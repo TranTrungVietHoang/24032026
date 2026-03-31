@@ -15,7 +15,11 @@ module.exports = {
             role: role,
             loginCount: loginCount
         })
-        await newUser.save({session});
+        if (session) {
+            await newUser.save({session});
+        } else {
+            await newUser.save();
+        }
         return newUser;
     },
     FindUserByUsername: async function (username) {
