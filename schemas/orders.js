@@ -1,7 +1,7 @@
 let mongoose = require('mongoose');
 
-// Chi tiết sản phẩm trong đơn đặt trước
-let reservationItemSchema = mongoose.Schema({
+// Chi tiết từng sản phẩm trong đơn hàng
+let orderItemSchema = mongoose.Schema({
     product: {
         type: mongoose.Types.ObjectId,
         ref: 'product',
@@ -24,30 +24,31 @@ let reservationItemSchema = mongoose.Schema({
     }
 });
 
-let reservationSchema = mongoose.Schema({
+let orderSchema = mongoose.Schema({
     user: {
         type: mongoose.Types.ObjectId,
         ref: 'user',
         required: true
     },
     items: {
-        type: [reservationItemSchema],
+        type: [orderItemSchema],
         default: []
     },
     totalAmount: {
         type: Number,
-        default: 0,
+        required: true,
         min: 0
+    },
+    shippingAddress: {
+        fullName: { type: String, required: true },
+        phone: { type: String, required: true },
+        address: { type: String, required: true },
+        city: { type: String, required: true }
     },
     status: {
         type: String,
-        enum: ['active', 'cancelled', 'expired', 'transferred'],
-        default: 'active'
-    },
-    expiredAt: {
-        type: Date,
-        // Mặc định hết hạn sau 24 giờ
-        default: () => new Date(Date.now() + 24 * 60 * 60 * 1000)
+        enum: ['pending', 'confirmed', 'shipping', 'delivered', 'cancelled'],
+        default: 'pending'
     },
     note: {
         type: String,
@@ -61,4 +62,4 @@ let reservationSchema = mongoose.Schema({
     timestamps: true
 });
 
-module.exports = new mongoose.model('reservation', reservationSchema);
+module.exports = new mongoose.model('order', orderSchema);
