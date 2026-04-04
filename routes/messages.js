@@ -117,4 +117,46 @@ router.get('/:userID', CheckLogin, async function (req, res, next) {
     }
 });
 
+// PUT "/:id" - Sửa nội dung tin nhắn (chỉ người gửi mới được sửa)
+router.put('/:id', CheckLogin, async function (req, res, next) {
+    try {
+        const message = await messageModel.findOne({ _id: req.params.id, isDeleted: false });
+        if (!message) return res.status(404).send({ success: false, message: "Không tìm thấy tin nhắn" });
+
+        // Chỉ người gửi mới được sửa
+        if (message.from.toString() !== req.user._id.toString()) {
+            return res.status(403).send({ success: false, message: "Bạn không có quyền sửa tin nhắn này" });
+        }
+
+        const { text, type } = req.body;
+        if (text) message.messageContent.text = text;
+        if (type) message.messageContent.type = type;
+        await message.save();
+
+        await message.populate('from', 'username fullName avatarUrl');
+        await message.populate('to', 'username fullName avatarUrl');
+        res.status(200).send({ success: true, data: message });
+    } catch (error) {
+        res.status(400).send({ success: false, message: error.message });
+    }
+});
+
+// DELETE "/:id" - Xóa mềm tin nhắn (chỉ người gửi mới được xóa)
+router.delete('/:id', CheckLogin, async function (req, res, next) {
+    try {
+        const message = await messageModel.findOne({ _id: req.params.id, isDeleted: false });
+        if (!message) return res.status(404).send({ success: false, message: "Không tìm thấy tin nhắn" });
+
+        if (message.from.toString() !== req.user._id.toString()) {
+            return res.status(403).send({ success: false, message: "Bạn không có quyền xóa tin nhắn này" });
+        }
+
+        message.isDeleted = true;
+        await message.save();
+        res.status(200).send({ success: true, message: "Đã xóa tin nhắn" });
+    } catch (error) {
+        res.status(500).send({ success: false, message: error.message });
+    }
+});
+
 module.exports = router;

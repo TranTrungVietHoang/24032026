@@ -85,6 +85,7 @@ router.put('/:id', async (req, res) => {
                 result[key] = req.body[key]
             }
             await result.save();
+            res.json(result); // FIX: trả về kết quả sau khi lưu
         } else {
             res.status(404).send({
                 message: "ID NOT FOUND"

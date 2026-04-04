@@ -159,4 +159,37 @@ router.post('/modify', CheckLogin, async function (req, res, next) {
     await cart.save();
     res.send(cart)
 })
+
+// GET /api/v1/carts/:id - Lấy cart theo Cart ID (dùng cho admin)
+router.get('/:id', CheckLogin, async function (req, res, next) {
+    try {
+        let cart = await cartSchema.findById(req.params.id)
+            .populate('user', 'username email fullName')
+            .populate('products.product', 'title price images');
+        if (!cart) return res.status(404).json({ message: 'Không tìm thấy giỏ hàng' });
+        res.json(cart);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+})
+
+// DELETE /api/v1/carts/:id - Xóa toàn bộ sản phẩm trong cart (clear giỏ hàng)
+router.delete('/:id', CheckLogin, async function (req, res, next) {
+    try {
+        let cart = await cartSchema.findById(req.params.id);
+        if (!cart) return res.status(404).json({ message: 'Không tìm thấy giỏ hàng' });
+
+        // Chỉ được xóa cart của chính mình
+        if (cart.user.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: 'Không có quyền xóa giỏ hàng này' });
+        }
+
+        cart.products = [];
+        await cart.save();
+        res.json({ message: 'Đã xóa toàn bộ sản phẩm trong giỏ hàng', cart });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+})
+
 module.exports = router;
