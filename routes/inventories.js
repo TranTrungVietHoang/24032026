@@ -54,6 +54,18 @@ router.get('/:id', async function (req, res, next) {
     }
 });
 
+// GET /api/v1/inventories/product/:productId - Lấy tồn kho theo Product ID (Frontend gọi)
+router.get('/product/:productId', async function (req, res, next) {
+    try {
+        let inventory = await inventoryModel.findOne({ product: req.params.productId })
+            .populate('product', 'title price images slug');
+        if (!inventory) return res.status(404).json({ message: 'Sản phẩm chưa có thông tin kho' });
+        res.json(inventory);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 // POST /api/v1/inventories - Tạo mới kho (thường tự động tạo khi tạo Product)
 // Endpoint này dùng để tạo thủ công nếu cần
 router.post('/', CheckLogin, CheckRole('ADMIN'), async function (req, res, next) {

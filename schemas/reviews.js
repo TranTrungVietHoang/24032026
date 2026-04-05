@@ -25,6 +25,14 @@ let reviewSchema = mongoose.Schema({
         type: [String],
         default: []
     },
+    order: {
+        type: mongoose.Types.ObjectId,
+        ref: 'order'
+    },
+    isHidden: {
+        type: Boolean,
+        default: false
+    },
     isDeleted: {
         type: Boolean,
         default: false
