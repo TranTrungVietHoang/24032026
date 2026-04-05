@@ -1,0 +1,58 @@
+[
+  {
+    "_id": "69d1e6bf21826fc84c6412db",
+    "sku": "SKU-1775363775473",
+    "title": "Iphone 16 Pro Max",
+    "slug": "Iphone-16-Pro-Max",
+    "price": 30000000,
+    "description": "Máy mới nguyên seal",
+    "images": [],
+    "isDeleted": false,
+    "category": {
+      "_id": "69d1e4eceff373d9531d8c2d",
+      "name": "Đồ điện tử",
+      "id": "69d1e4eceff373d9531d8c2d"
+    },
+    "createdAt": "2026-04-05T04:36:15.474Z",
+    "updatedAt": "2026-04-05T04:36:15.474Z",
+    "__v": 0
+  },
+  {
+    "_id": "69d21887ace40d8c3c401a46",
+    "sku": "SKU-1775376519788",
+    "title": "macbook pro",
+    "slug": "macbook-pro",
+    "price": 55555555,
+    "description": "ddd",
+    "images": [],
+    "isDeleted": false,
+    "category": {
+      "_id": "69d2183aace40d8c3c401a38",
+      "name": "laptop",
+      "id": "69d2183aace40d8c3c401a38"
+    },
+    "createdAt": "2026-04-05T08:08:39.829Z",
+    "updatedAt": "2026-04-05T08:08:39.829Z",
+    "__v": 0
+  },
+  {
+    "_id": "69d21a377216e3db1416dc20",
+    "sku": "SKU-1775376951636",
+    "title": "55",
+    "slug": "55",
+    "price": 55,
+    "description": "d",
+    "images": [
+      "http://localhost:3000/api/v1/uploads/1775377157058-879676258.jpg"
+    ],
+    "isDeleted": false,
+    "category": {
+      "_id": "69d2183aace40d8c3c401a38",
+      "name": "laptop",
+      "id": "69d2183aace40d8c3c401a38"
+    },
+    "createdAt": "2026-04-05T08:15:51.644Z",
+    "updatedAt": "2026-04-05T08:19:17.283Z",
+    "__v": 1
+  }
+]

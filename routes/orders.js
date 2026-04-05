@@ -157,6 +157,16 @@ router.put('/:id', CheckLogin, CheckRole('ADMIN', 'MODERATOR'), async function (
             });
         }
 
+        // BƯỚC 6: Thông báo khi đơn hàng đã cập nhật thành công (Đã Giao)
+        if (req.body.status === 'delivered' && order.status !== 'delivered') {
+            await notificationModel.create({
+                user: order.user,
+                title: "✅ Giao hàng thành công",
+                content: `Đơn hàng mang mã ${order._id} của bạn đã lấy giao đến nơi. Mong bạn hài lòng với sản phẩm!`,
+                type: 'order'
+            });
+        }
+
         // Cập nhật các trường còn lại
         let keys = Object.keys(req.body);
         for(let key of keys){

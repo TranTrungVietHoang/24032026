@@ -85,7 +85,14 @@ router.put('/:id', CheckLogin, CheckRole('ADMIN', 'MODERATOR'), async (req, res)
         if (result) {
             let keys = Object.keys(req.body);
             for (const key of keys) {
-                result[key] = req.body[key]
+                result[key] = req.body[key];
+                if (key === 'title') {
+                    result.slug = slugify(req.body[key], {
+                        replacement: '-',
+                        lower: false,
+                        remove: undefined,
+                    });
+                }
             }
             await result.save();
             res.json(result); // FIX: trả về kết quả sau khi lưu
@@ -109,6 +116,7 @@ router.delete('/:id', CheckLogin, CheckRole('ADMIN'), async (req, res) => {
         if (result) {
             result.isDeleted = true;
             await result.save();
+            res.json({ message: "Deleted successfully" });
         } else {
             res.status(404).send({
                 message: "ID NOT FOUND"

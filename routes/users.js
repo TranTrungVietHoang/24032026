@@ -30,6 +30,25 @@ router.get("/", CheckLogin, CheckRole("ADMIN", "MODERATOR"), async function (req
   res.send(users);
 });
 
+router.get("/admins", CheckLogin, async function (req, res, next) {
+  try {
+      let users = await userModel
+        .find({ isDeleted: false })
+        .populate({
+          path: 'role',
+          match: { name: 'ADMIN' }, // Chỉ lấy những user có role là ADMIN
+          select: 'name'
+        });
+      
+      // Mongoose populate với match sẽ gán role = null nếu không khớp 'ADMIN'
+      // Ta chỉ lấy các user có role != null
+      let adminUsers = users.filter(u => u.role !== null);
+      res.send(adminUsers);
+  } catch (err) {
+      res.status(500).send({ message: err.message });
+  }
+});
+
 router.get("/:id",CheckLogin,CheckRole("ADMIN"), async function (req, res, next) {
   try {
     let result = await userModel

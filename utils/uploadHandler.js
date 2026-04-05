@@ -43,7 +43,7 @@ let filterExcel = function (req, file, cb) {
 module.exports = {
     // Để nguyên tên module cũ để các file Routes gọi không bị lỗi
     uploadImage: multer({
-        storage: cloudinaryStorage,
+        storage: diskStorage,
         limits: 5 * 1024 * 1024 // Giới hạn 5MB
     }),
     uploadExcel: multer({

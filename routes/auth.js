@@ -39,7 +39,11 @@ router.post('/login', async function (req, res, next) {
             return;
         }
         if (result.lockTime > Date.now()) {
-            res.status(404).send("ban dang bi ban");
+            res.status(403).send("ban dang bi ban do sai mat khau");
+            return;
+        }
+        if (result.status === true) {
+            res.status(403).send("Tài khoản của bạn đã bị khóa bởi quản trị viên.");
             return;
         }
         result = await userController.CompareLogin(result, password);

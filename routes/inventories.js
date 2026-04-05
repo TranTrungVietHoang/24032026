@@ -7,7 +7,15 @@ let { CheckLogin, CheckRole } = require('../utils/authHandler');
 router.get('/', async function (req, res, next) {
     try {
         let inventories = await inventoryModel.find()
-            .populate('product', 'title price images slug');
+            .populate({
+                path: 'product',
+                select: 'title price images slug',
+                match: { isDeleted: false }
+            });
+        
+        // Lọc bỏ các bản ghi inventory mà product đã bị soft delete (product = null)
+        inventories = inventories.filter(inv => inv.product !== null);
+        
         res.json(inventories);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -18,8 +26,16 @@ router.get('/', async function (req, res, next) {
 router.get('/low-stock', CheckLogin, CheckRole('ADMIN', 'MODERATOR'), async function (req, res, next) {
     try {
         let lowInventories = await inventoryModel.find({ stock: { $lt: 5 } })
-            .populate('product', 'title price images slug')
+            .populate({
+                path: 'product',
+                select: 'title price images slug',
+                match: { isDeleted: false }
+            })
             .sort({ stock: 1 });
+            
+        // Lọc bỏ các bản ghi inventory mà product đã bị soft delete (product = null)
+        lowInventories = lowInventories.filter(inv => inv.product !== null);
+        
         res.json(lowInventories);
     } catch (err) {
         res.status(500).json({ message: err.message });

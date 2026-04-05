@@ -36,7 +36,11 @@ router.get('/unread-count', CheckLogin, async function (req, res, next) {
 router.put('/read-all', CheckLogin, async function (req, res, next) {
     try {
         await notificationModel.updateMany(
-            { user: req.user._id, isRead: false, isDeleted: false },
+            { 
+                $or: [{ user: req.user._id }, { user: null }], 
+                isRead: false, 
+                isDeleted: false 
+            },
             { $set: { isRead: true } }
         );
         res.json({ success: true, message: "Đã đánh dấu tất cả là đã đọc" });
@@ -49,7 +53,10 @@ router.put('/read-all', CheckLogin, async function (req, res, next) {
 router.put('/:id/read', CheckLogin, async function (req, res, next) {
     try {
         let noti = await notificationModel.findOneAndUpdate(
-            { _id: req.params.id, user: req.user._id },
+            { 
+                _id: req.params.id, 
+                $or: [{ user: req.user._id }, { user: null }] 
+            },
             { $set: { isRead: true } },
             { new: true }
         );
