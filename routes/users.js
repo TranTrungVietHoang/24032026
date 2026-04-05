@@ -49,6 +49,51 @@ router.get("/admins", CheckLogin, async function (req, res, next) {
   }
 });
 
+// PUT /api/v1/users/profile - Cập nhật thông tin cá nhân của chính mình
+router.put("/profile", CheckLogin, async function (req, res, next) {
+  try {
+    const userId = req.user._id;
+    // Không cho phép đổi username và role qua đường này
+    const { fullName, email, avatarUrl } = req.body;
+    
+    let updatedUser = await userModel.findByIdAndUpdate(
+      userId,
+      { fullName, email, avatarUrl },
+      { new: true, runValidators: true }
+    ).select("-password");
+
+    if (!updatedUser) return res.status(404).send({ message: "Không tìm thấy người dùng" });
+    res.send(updatedUser);
+  } catch (err) {
+    res.status(400).send({ message: err.message });
+  }
+});
+
+// PUT /api/v1/users/change-password - Đổi mật khẩu
+router.put("/change-password", CheckLogin, async function (req, res, next) {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const user = await userModel.findById(req.user._id);
+    
+    if (!user) return res.status(404).json({ message: "Người dùng không tồn tại" });
+
+    // 1. Kiểm tra mật khẩu cũ
+    const bcrypt = require('bcrypt');
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Mật khẩu hiện tại không chính xác" });
+    }
+
+    // 2. Cập nhật mật khẩu mới (Mongoose hook sẽ tự băm password)
+    user.password = newPassword;
+    await user.save();
+
+    res.send({ message: "Đổi mật khẩu thành công" });
+  } catch (err) {
+    res.status(400).send({ message: err.message });
+  }
+});
+
 router.get("/:id",CheckLogin,CheckRole("ADMIN"), async function (req, res, next) {
   try {
     let result = await userModel
@@ -107,5 +152,7 @@ router.delete("/:id", CheckLogin, CheckRole('ADMIN'), async function (req, res, 
     res.status(400).send({ message: err.message });
   }
 });
+
+
 
 module.exports = router;
