@@ -14,6 +14,18 @@ router.get('/', async function (req, res, next) {
     }
 });
 
+// GET /api/v1/inventories/low-stock - Lấy danh sách hàng sắp cạn (Dashboard)
+router.get('/low-stock', CheckLogin, CheckRole('ADMIN', 'MODERATOR'), async function (req, res, next) {
+    try {
+        let lowInventories = await inventoryModel.find({ stock: { $lt: 5 } })
+            .populate('product', 'title price images slug')
+            .sort({ stock: 1 });
+        res.json(lowInventories);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 // GET /api/v1/inventories/:id - Lấy chi tiết 1 kho theo inventory ID
 router.get('/:id', async function (req, res, next) {
     try {

@@ -1,4 +1,5 @@
 // Backend Web Bán Hàng - RESTful API
+require('dotenv').config();
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
@@ -38,11 +39,15 @@ app.use('/api/v1/messages', require('./routes/messages'));
 app.use('/api/v1/orders', require('./routes/orders'));
 app.use('/api/v1/reviews', require('./routes/reviews'));
 app.use('/api/v1/reservations', require('./routes/reservations'));
+app.use('/api/v1/vouchers', require('./routes/vouchers'));
+app.use('/api/v1/notifications', require('./routes/notifications'));
+app.use('/api/v1/suppliers', require('./routes/suppliers'));
 
 // ==================== DATABASE ====================
-mongoose.connect('mongodb://localhost:27017/NNPTUD-S3');
+let dbUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/NNPTUD-S3';
+mongoose.connect(dbUri);
 mongoose.connection.on('connected', function () {
-    console.log('✅ MongoDB connected');
+    console.log('✅ MongoDB ATLAS CLOUD connected successfully!');
 });
 mongoose.connection.on('disconnected', function () {
     console.log('❌ MongoDB disconnected');

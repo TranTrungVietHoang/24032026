@@ -66,10 +66,12 @@ userSchema.pre('save', function () {
     this.password = bcrypt.hashSync(this.password, salt);
   }
 })
-userSchema.pre('findOneAndUpdate', function () {
-  let salt = bcrypt.genSaltSync(10);
-  console.log(this);
-  this._update.password = bcrypt.hashSync(this._update.password, salt);
+userSchema.pre('findOneAndUpdate', function (next) {
+  if (this._update.password) {
+    let salt = bcrypt.genSaltSync(10);
+    this._update.password = bcrypt.hashSync(this._update.password, salt);
+  }
+  next();
 })
 
 module.exports = mongoose.model("user", userSchema);

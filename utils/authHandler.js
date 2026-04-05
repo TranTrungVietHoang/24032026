@@ -1,20 +1,25 @@
+require('dotenv').config();
 let userController = require('../controllers/users')
 let jwt = require('jsonwebtoken')
 
 module.exports = {
     CheckLogin: async function (req, res, next) {
         let key = req.headers.authorization;
+        let token = "";
+
         if (!key) {
             if (req.cookies.LOGIN_NNPTUD_S3) {
-                key = req.cookies.LOGIN_NNPTUD_S3;
+                token = req.cookies.LOGIN_NNPTUD_S3;
             } else {
-                res.status(401).send("Bạn chưa đăng nhập")
-                return;
+                return res.status(401).json({ message: "Bạn chưa đăng nhập" });
             }
+        } else {
+            // Cắt chữ 'Bearer ' nếu Postman tự động lắp vào
+            token = key.startsWith('Bearer ') ? key.slice(7, key.length) : key;
         }
 
         try {
-            let result = jwt.verify(key, 'secretKey')
+            let result = jwt.verify(token, process.env.JWT_SECRET || 'secretKey')
             if (result.exp * 1000 < Date.now()) {
                 res.status(401).send("Token đã hết hạn")
                 return;

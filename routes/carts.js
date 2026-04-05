@@ -14,6 +14,7 @@ router.get('/', CheckLogin, async function (req, res, next) {
 router.post('/add', CheckLogin, async function (req, res, next) {
     let user = req.user;
     let productId = req.body.product;
+    let quantity = parseInt(req.body.quantity) || 1;
 
     let cart = await cartSchema.findOne({
         user: user._id
@@ -41,16 +42,16 @@ router.post('/add', CheckLogin, async function (req, res, next) {
         }
         cart.products.push({
             product: productId,
-            quantity: 1
+            quantity: quantity
         })
     } else {
-        if (stock - cart.products[index].quantity < 1) {
+        if (stock - cart.products[index].quantity < quantity) {
             res.status(404).send({
                 message: "san pham trong kho khong du"
             });
             return;
         }
-        cart.products[index].quantity++
+        cart.products[index].quantity += quantity
     }
     await cart.save();
     res.send(cart)

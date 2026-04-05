@@ -1,0 +1,497 @@
+{
+	"info": {
+		"_postman_id": "fc5ebbe3-8515-4ba8-9c59-865610b27b9c",
+		"name": "Kịch Bản Test - NNPTUD E-Commerce Đồ Án",
+		"description": "Kịch bản test TOÀN DIỆN 14 module của hệ thống. Chạy tuần tự từ 1 đến 6 để thấy logic dòng chảy dữ liệu.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "9999999"
+	},
+	"item": [
+		{
+			"name": "1. Khởi tạo & Định danh (Auth)",
+			"item": [
+				{
+					"name": "1. Đăng ký Tài khoản (User mới)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin123\",\n    \"password\": \"123456\",\n    \"email\": \"admin123@gmail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Đăng nhập & Lấy Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var data = pm.response.json();",
+									"if(data.success && data.token) {",
+									"    pm.collectionVariables.set(\"TOKEN\", data.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin123\",\n    \"password\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Hàng hóa (Products & Interventory)",
+			"item": [
+				{
+					"name": "1. Tạo Danh Mục Mới (ADMIN)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Đồ điện tử\",\n    \"image\": \"https://anh.com/do-dien-tu.png\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/categories",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Tạo SP Mới (Tự lưu Inventory)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var data = pm.response.json();",
+									"// Lưu Product ID để test đặt hàng",
+									"pm.collectionVariables.set(\"PRODUCT_ID\", data.product._id || data.product);",
+									"pm.collectionVariables.set(\"INVENTORY_ID\", data._id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Iphone 16 Pro Max\",\n    \"description\": \"Máy mới nguyên seal\",\n    \"price\": 30000000\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Nhập số lượng Kho cho SP (Inventory)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"stock\": 10\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/inventories/{{INVENTORY_ID}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"inventories",
+								"{{INVENTORY_ID}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Logic Giỏ hàng & Voucher",
+			"item": [
+				{
+					"name": "1. Tạo Mã Giảm Giá Khủng",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"SIEUSALE\",\n    \"discountType\": \"fixed\",\n    \"discountValue\": 5000000,\n    \"minOrderValue\": 1000000,\n    \"endDate\": \"2029-12-30\",\n    \"usageLimit\": 5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/vouchers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"vouchers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Thêm SP vào Giỏ Hàng",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"product\": \"{{PRODUCT_ID}}\",\n    \"quantity\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/carts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"carts"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Chốt Đơn & Hủy Hoàn Kho",
+			"item": [
+				{
+					"name": "1. Đặt Hàng (Test cạn kho: Mua 100 cái để thấy lỗi)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"items\": [\n        {\n            \"product\": \"{{PRODUCT_ID}}\",\n            \"quantity\": 100,\n            \"price\": 30000000,\n            \"subtotal\": 3000000000\n        }\n    ],\n    \"shippingAddress\": {\n        \"fullName\": \"Trần A\",\n        \"phone\": \"098888\",\n        \"address\": \"Hồ Chí Minh\",\n        \"city\": \"HCM\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/orders",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Đặt Hàng (Chuẩn - Mua 2 cái & Áp Voucher)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var data = pm.response.json();",
+									"pm.collectionVariables.set(\"ORDER_ID\", data._id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"voucherCode\": \"SIEUSALE\",\n    \"items\": [\n        {\n            \"product\": \"{{PRODUCT_ID}}\",\n            \"quantity\": 2,\n            \"price\": 30000000,\n            \"subtotal\": 60000000\n        }\n    ],\n    \"shippingAddress\": {\n        \"fullName\": \"Trần A\",\n        \"phone\": \"098888\",\n        \"address\": \"Hồ Chí Minh\",\n        \"city\": \"HCM\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/orders",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Hủy Đơn (Phục hồi Tồn Kho & Gửi Noti)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"cancelled\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/orders/{{ORDER_ID}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"{{ORDER_ID}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "5. Chuông Báo Động (Dashboard)",
+			"item": [
+				{
+					"name": "1. Lọc Hàng Sắp Hết",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/inventories/low-stock",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"inventories",
+								"low-stock"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Xem tất cả Cảnh Báo/Thông báo",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/notifications",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"notifications"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000/api/v1"
+		},
+		{
+			"key": "TOKEN",
+			"value": ""
+		},
+		{
+			"key": "PRODUCT_ID",
+			"value": ""
+		},
+		{
+			"key": "INVENTORY_ID",
+			"value": ""
+		},
+		{
+			"key": "ORDER_ID",
+			"value": ""
+		}
+	]
+}

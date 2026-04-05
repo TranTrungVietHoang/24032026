@@ -4,6 +4,7 @@ let slugify = require('slugify')
 let productSchema = require('../schemas/products')
 let inventorySchema = require('../schemas/inventories')
 let mongoose = require('mongoose')
+let { CheckLogin, CheckRole } = require('../utils/authHandler');
 
 router.get('/', async (req, res) => {
     let queries = req.query;
@@ -37,14 +38,15 @@ router.get('/:id', async (req, res) => {//req.params
         })
     }
 })
-// REPLICA SET
-// LOCAL : bat replica set
-// ATLAS: co san
-router.post('/', async (req, res) => {
-    let session = await mongoose.startSession()
-    session.startTransaction()
+router.post('/', CheckLogin, CheckRole('ADMIN', 'MODERATOR'), async (req, res) => {
+    if (!req.body.category) {
+        return res.status(400).json({ message: "Vui lòng chọn Danh mục (Category) cho sản phẩm!" });
+    }
+    let session = await mongoose.startSession();
+    session.startTransaction();
     try {
         let newProducts = new productSchema({
+            sku: req.body.sku || ('SKU-' + Date.now()),
             title: req.body.title,
             slug: slugify(req.body.title, {
                 replacement: '-',
@@ -52,8 +54,8 @@ router.post('/', async (req, res) => {
                 remove: undefined,
             }),
             description: req.body.description,
-            category: req.body.category,
-            images: req.body.images,
+            category: req.body.category || null,
+            images: req.body.images || [],
             price: req.body.price
         })
         await newProducts.save({ session })
@@ -64,16 +66,17 @@ router.post('/', async (req, res) => {
         })
         await newInventory.save({ session });
         await newInventory.populate('product')
+        
         await session.commitTransaction();
-        await session.endSession()
+        await session.endSession();
         res.send(newInventory)
     } catch (error) {
         await session.abortTransaction();
-        await session.endSession()
-        res.status(404).send(error.message)
+        await session.endSession();
+        res.status(400).send(error.message)
     }
 })
-router.put('/:id', async (req, res) => {
+router.put('/:id', CheckLogin, CheckRole('ADMIN', 'MODERATOR'), async (req, res) => {
     try {
         let result = await productSchema.findOne({
             isDeleted: false,
@@ -97,7 +100,7 @@ router.put('/:id', async (req, res) => {
         })
     }
 })
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', CheckLogin, CheckRole('ADMIN'), async (req, res) => {
     try {
         let result = await productSchema.findOne({
             isDeleted: false,

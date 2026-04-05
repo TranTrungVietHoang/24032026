@@ -32,9 +32,10 @@ let productSchema = mongoose.Schema({
         type:Boolean,
         default:false
     },
-    category:{
-        type:mongoose.Types.ObjectId,
-        ref:'category'
+    category: {
+        type: mongoose.Types.ObjectId,
+        ref: 'category',
+        required: [true, "Sản phẩm bắt buộc phải chọn danh mục (Category)"]
     }
 },{
     timestamps:true

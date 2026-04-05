@@ -3,8 +3,8 @@ let router = express.Router()
 let { GenID } = require('../utils/IDHandler')
 let slugify = require('slugify')
 let categorySchema = require('../schemas/categories');
-let productSchema = require('../schemas/products')
-
+let productSchema = require('../schemas/products');
+let { CheckLogin, CheckRole } = require('../utils/authHandler');
 
 router.get('/:id', async (req, res) => {//req.params
     try {
@@ -48,7 +48,7 @@ router.get('/:id/products', async (req, res) => {//req.params
         res.send(filterData.products)
     }
 })
-router.post('/', async function (req, res, next) {
+router.post('/', CheckLogin, CheckRole('ADMIN', 'MODERATOR'), async function (req, res, next) {
     let newItem = new categorySchema({
         name: req.body.name,
         slug: slugify(req.body.name, {
@@ -61,7 +61,7 @@ router.post('/', async function (req, res, next) {
     await newItem.save();
     res.send(newItem)
 })
-router.put('/:id', async function (req, res, next) {
+router.put('/:id', CheckLogin, CheckRole('ADMIN', 'MODERATOR'), async function (req, res, next) {
     try {
         // let getItem = await categorySchema.findOne({
         //     isDeleted: false,
@@ -98,7 +98,7 @@ router.put('/:id', async function (req, res, next) {
         )
     }
 })
-router.delete('/:id', async function (req, res, next) {
+router.delete('/:id', CheckLogin, CheckRole('ADMIN'), async function (req, res, next) {
     try {
         let getItem = await categorySchema.findOne({
             isDeleted: false,

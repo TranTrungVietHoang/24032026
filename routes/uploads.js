@@ -9,8 +9,9 @@ let productModel = require('../schemas/products')
 let inventoryModel = require('../schemas/inventories')
 let categoryModel = require('../schemas/categories')
 let slugify = require('slugify')
+let { CheckLogin, CheckRole } = require('../utils/authHandler');
 
-router.post('/an_image', uploadImage.single('file')
+router.post('/an_image', CheckLogin, uploadImage.single('file')
     , function (req, res, next) {
         if (!req.file) {
             res.send({
@@ -29,7 +30,7 @@ router.get('/:filename', function (req, res, next) {
     res.sendFile(filename)
 })
 
-router.post('/multiple_images', uploadImage.array('files', 5)
+router.post('/multiple_images', CheckLogin, uploadImage.array('files', 5)
     , function (req, res, next) {
         if (!req.files) {
             res.send({
@@ -52,7 +53,7 @@ router.post('/multiple_images', uploadImage.array('files', 5)
         }
     })
 
-router.post('/excel', uploadExcel.single('file')
+router.post('/excel', CheckLogin, CheckRole('ADMIN', 'MODERATOR'), uploadExcel.single('file')
     , async function (req, res, next) {
         if (!req.file) {
             res.send({

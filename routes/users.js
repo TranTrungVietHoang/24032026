@@ -7,7 +7,7 @@ let { CheckLogin, CheckRole } = require('../utils/authHandler')
 let { importUsersFromExcel } = require('../utils/importHandler');
 const path = require('path');
 
-router.post('/import', async function (req, res, next) {
+router.post('/import', CheckLogin, CheckRole('ADMIN'), async function (req, res, next) {
   try {
     const filePath = path.join(__dirname, '../uploads/1774322498612-671548538.xlsx');
     const results = await importUsersFromExcel(filePath);
@@ -45,7 +45,7 @@ router.get("/:id",CheckLogin,CheckRole("ADMIN"), async function (req, res, next)
   }
 });
 
-router.post("/", CreateUserValidator, validationResult, async function (req, res, next) {
+router.post("/", CheckLogin, CheckRole('ADMIN'), CreateUserValidator, validationResult, async function (req, res, next) {
   try {
     let newItem = await userController.CreateAnUser(
       req.body.username, req.body.password, req.body.email, req.body.role
@@ -56,7 +56,7 @@ router.post("/", CreateUserValidator, validationResult, async function (req, res
   }
 });
 
-router.put("/:id", async function (req, res, next) {
+router.put("/:id", CheckLogin, CheckRole('ADMIN'), async function (req, res, next) {
   try {
     let id = req.params.id;
     let updatedItem = await
@@ -72,7 +72,7 @@ router.put("/:id", async function (req, res, next) {
   }
 });
 
-router.delete("/:id", async function (req, res, next) {
+router.delete("/:id", CheckLogin, CheckRole('ADMIN'), async function (req, res, next) {
   try {
     let id = req.params.id;
     let updatedItem = await userModel.findByIdAndUpdate(
