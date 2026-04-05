@@ -19,6 +19,22 @@ router.get('/', async function (req, res, next) {
     }
 });
 
+// GET /api/v1/reviews/product/:productId - Lấy danh sách review theo sản phẩm (Frontend gọi kiểu này)
+router.get('/product/:productId', async function (req, res, next) {
+    try {
+        let reviews = await reviewModel.find({ 
+            product: req.params.productId, 
+            isDeleted: false 
+        })
+            .populate('user', 'username fullName avatarUrl')
+            .populate('product', 'title')
+            .sort({ createdAt: -1 });
+        res.json(reviews);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 // GET /api/v1/reviews/:id - Lấy chi tiết 1 review
 router.get('/:id', async function (req, res, next) {
     try {
